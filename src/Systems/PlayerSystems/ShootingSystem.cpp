@@ -1,7 +1,7 @@
 ﻿#include "ShootingSystem.h"
 #include "ECS/ECS.h"
 #include "Platform/Input.h"
-#include "../SpriteSheet.h"
+#include "../../SpriteSheet.h"
 
 void ShootingSystem::Update(float dt)
 {
