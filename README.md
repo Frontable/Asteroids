@@ -1,3 +1,6 @@
+
+
+
 ## Getting Started
 
 ### 1. Clone the repository
@@ -20,3 +23,5 @@ cmake --build build --config Debug
 ### 4. Run
 
 The executable will be in build/Release/ or build/Debug/ depending on the config.
+
+https://github.com/user-attachments/assets/18cf9fec-a542-48c1-954e-b9e179f54ee7
