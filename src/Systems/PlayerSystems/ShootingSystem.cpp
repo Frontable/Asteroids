@@ -9,12 +9,12 @@ void ShootingSystem::Update(float dt)
     for (auto& entity : m_entities)
     {
         if (!Input::IsKeyJustPressed(GLFW_KEY_SPACE))
-            continue;  // ← was return
+            continue;
 
         auto& playerTransform = ecs.GetComponent<Transform2D>(entity);
 
         vec2 forward{
-        cos(playerTransform.rotation - PI / 2.0f),  // ← same offset
+        cos(playerTransform.rotation - PI / 2.0f),  // ← same offset for dir vec
         sin(playerTransform.rotation - PI / 2.0f)
         };
 

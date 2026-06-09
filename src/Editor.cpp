@@ -212,7 +212,7 @@ void Editor::Render(float dt)
         auto& ecs = m_MainContext.Get<FrostEngine::ECS>();
         auto& camera = m_MainContext.Get<FrostEngine::Camera2D>();
 
-        // Iterate all entities with CircleCollider
+        
         for (auto& sys : { &ecs.getSystem<CollisionSystem>() })
         {
             for (Entity e : sys->m_entities)

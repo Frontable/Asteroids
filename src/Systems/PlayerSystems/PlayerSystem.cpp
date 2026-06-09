@@ -16,8 +16,8 @@ void PlayerSystem::Update(float dt)
 
         constexpr float rotateSpeed = 3.0f;
         constexpr float thrust = 400.0f;
-        constexpr float maxSpeed = 800.0f;  // ← add this
-        constexpr float drag = 0.98f;       // ← slightly stronger drag
+        constexpr float maxSpeed = 800.0f;  
+        constexpr float drag = 0.98f;       //drag
 
         for (auto& entity : m_entities)
         {
@@ -33,7 +33,7 @@ void PlayerSystem::Update(float dt)
             if (Input::IsKeyPressed(GLFW_KEY_W))
             {
                 vec2 forward{
-                    cos(transform.rotation - PI / 2.0f),  // ← offset by -90 degrees
+                    cos(transform.rotation - PI / 2.0f),  // ← offset by -90 degrees to get the dir vector since the sprites it pointing up
                     sin(transform.rotation - PI / 2.0f)
                 };
 

@@ -6,7 +6,7 @@ class ScoreSystem : public ISystem
 public:
     ScoreSystem(Context& _context) : ISystem{ _context } {}
 
-    // Call this when an asteroid is destroyed
+    
     void AddScore(int points = 100) { m_Score += points; }
 
     int GetScore() const { return m_Score; }
