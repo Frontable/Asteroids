@@ -1,6 +1,7 @@
 
 
 
+
 ## Getting Started
 
 ### 1. Clone the repository
@@ -24,4 +25,10 @@ cmake --build build --config Debug
 
 The executable will be in build/Release/ or build/Debug/ depending on the config.
 
-https://github.com/user-attachments/assets/18cf9fec-a542-48c1-954e-b9e179f54ee7
+
+Controlls:
+W -> Apply thrust to move forward.
+A / D -> Rotate left and right only while thrust is on.
+Space -> Shoot
+
+<img width="1314" height="766" alt="Asteroids" src="https://github.com/user-attachments/assets/4fc6ed3c-9747-4368-a48e-8006fabe8af6" />
