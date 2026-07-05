@@ -1,6 +1,9 @@
 ## Getting Started
 
-### 1. Clone the repository
+### Important - since I've changed a lot in the current engine layout there may be bugs occuring with rendering and resseting the game.
+### the old layout still works from the 
+
+### 1. Clone the repository main branch https://github.com/Frontable/Asteroids/tree/main
 
 git clone https://github.com/Frontable/Asteroids.git
 cd Asteroids
