@@ -1,0 +1,3 @@
+[submodule "third_party/Frost"]
+	path = third_party/Frost
+	url = https://github.com/Frontable/Frost.git
