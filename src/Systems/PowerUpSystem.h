@@ -20,7 +20,7 @@ public:
     }
 
 private:
-    // ── Tick world pickup entities (spinning, bobbing) ──────────
+    
     void TickWorldPickups(float dt)
     {
         auto view = m_Registry.GetView<Transform2D, PowerUpTag>();
@@ -31,7 +31,7 @@ private:
         }
     }
 
-    // ── Tick active effects on player ───────────────────────────
+    
     void TickActiveEffects(float dt)
     {
         if (!m_Registry.IsAlive(m_PlayerEntity)) return;
@@ -82,7 +82,7 @@ private:
         }
     }
 
-    // ── Check if player overlaps a pickup ───────────────────────
+    
     void CheckPlayerPickup()
     {
         if (!m_Registry.IsAlive(m_PlayerEntity)) return;
@@ -151,5 +151,5 @@ private:
     }
 
     Frost::Registry& m_Registry;
-    Frost::Entity    m_PlayerEntity;
+    Frost::Entity m_PlayerEntity;
 };

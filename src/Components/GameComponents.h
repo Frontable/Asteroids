@@ -1,18 +1,18 @@
-#pragma once
+﻿#pragma once
 #include "Core/FrostMath.h"
 
 
 struct Transform2D
 {
     Frost::vec2 position = { 0.0f, 0.0f };
-    float       rotation = 0.0f;
+    float rotation = 0.0f;
     Frost::vec2 scale = { 1.0f, 1.0f };
 };
 
 struct Velocity2D
 {
     Frost::vec2 velocity = { 0.0f, 0.0f };
-    float       angularVelocity = 0.0f;
+    float angularVelocity = 0.0f;
 };
 
 struct Sprite
@@ -46,7 +46,7 @@ struct Flicker
 {
     float timer = 0.0f;
     float interval = 0.05f;
-    bool  visible = false;
+    bool visible = false;
 };
 
 struct Health
@@ -55,16 +55,16 @@ struct Health
     float max = 100.0f;
     float iFrames = 0.0f;   
     float iFrameMax = 1.5f;  
-    bool  isDead = false;
+    bool isDead = false;
 
     float Percent() const { return current / max; }
 };
 
 struct Experience
 {
-    int   current = 0;
-    int   level = 1;
-    int   threshold = 500;   
+    int current = 0;
+    int level = 1;
+    int threshold = 500;   
 
     // XP per asteroid size
     static constexpr int XP_LARGE = 150;
@@ -91,30 +91,30 @@ enum class PowerUpType
 struct PowerUp
 {
     PowerUpType type;
-    float       duration = 8.0f;  // seconds active after pickup
-    float       timeLeft = 8.0f;
-    bool        collected = false;
+    float duration = 8.0f;
+    float timeLeft = 8.0f;
+    bool collected = false;
 };
 
-struct PowerUpTag {};  // on the pickup entity (world item)
+struct PowerUpTag {};
 
-// Applied to player when collected
+
 struct ShieldEffect
 {
-    bool  active = true;    // absorbs next hit
+    bool active = true;
     float timeLeft = 8.0f;
 };
 
 struct RapidFireEffect
 {
     float timeLeft = 8.0f;
-    float cooldown = 0.0f;     // current shoot cooldown
-    float cooldownMax = 0.15f;    // reduced fire rate
+    float cooldown = 0.0f;
+    float cooldownMax = 0.15f;
 };
 
 struct SpeedBoostEffect
 {
     float timeLeft = 8.0f;
-    float maxSpeed = 600.0f;   // doubled from 300
-    float thrust = 400.0f;  // doubled from 200
+    float maxSpeed = 600.0f;
+    float thrust = 400.0f;
 };

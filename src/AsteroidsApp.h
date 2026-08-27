@@ -9,8 +9,7 @@ public:
         : Application({
             "Asteroids",
             1280, 720,
-            true,
-            "Assets/"
+            true
             }) {
     }
 

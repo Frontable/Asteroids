@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Frost.h"
 #include "../Components/GameComponents.h"
 
@@ -39,8 +39,7 @@ public:
         auto view = m_Registry.GetView<Transform2D>();
         for (auto entry : view)
         {
-            // TODO: skip bullets
-            //if()
+            
             Transform2D& t = std::get<0>(entry.components);
 
             float hw = t.scale.x * 0.5f;

@@ -1,4 +1,4 @@
-#version 330 core
+﻿#version 330 core
 
 in vec2 vUV;
 in vec4 vColor;
@@ -11,7 +11,18 @@ uniform bool      uUseTexture;
 void main()
 {
     if (uUseTexture)
-        FragColor = texture(uTexture, vUV) * vColor;
+    {
+        vec4 texColor = texture(uTexture, vUV) * vColor;
+
+        // Discard fully transparent fragments
+        // so they don't write to the depth buffer
+        if (texColor.a < 0.01)
+            discard;
+
+        FragColor = texColor;
+    }
     else
+    {
         FragColor = vColor;
+    }
 }

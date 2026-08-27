@@ -11,7 +11,7 @@ public:
         , m_ScreenH(screenH) {
     }
 
-    // call after main render pass with UI projection
+    
     void Render(Frost::BatchRenderer& renderer,
         Frost::Texture* whiteTex,
         Frost::Shader* shader,
@@ -32,9 +32,7 @@ public:
         shader->SetMat4("uProjection", uiProjection);
         shader->SetInt("uUseTexture", 0);
 
-        renderer.Begin(shader, uiProjection);
-
-        // ... bar drawing unchanged ...
+        renderer.Begin(shader, uiProjection);       
 
         renderer.End();
 
@@ -76,9 +74,9 @@ public:
 private:
     void DrawQuad(Frost::BatchRenderer& renderer,
         Frost::Texture* tex,
-        Frost::vec2           pos,
-        Frost::vec2           size,
-        Frost::vec4           color)
+        Frost::vec2 pos,
+        Frost::vec2 size,
+        Frost::vec4 color)
     {
         renderer.DrawSprite(
             { pos.x + size.x * 0.5f, pos.y + size.y * 0.5f, 0.0f },
@@ -95,7 +93,7 @@ private:
     {
         if (percent > 0.6f) return { 0.2f, 0.85f, 0.2f, 0.9f }; // green
         if (percent > 0.3f) return { 1.0f, 0.75f, 0.0f, 0.9f }; // yellow
-        return               { 0.9f, 0.15f, 0.15f, 0.9f };       // red
+        return               { 0.9f, 0.15f, 0.15f, 0.9f }; // red
     }
 
     Frost::Registry& m_Registry;

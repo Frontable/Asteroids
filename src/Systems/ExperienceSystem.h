@@ -18,9 +18,9 @@ public:
         int amount = 0;
         switch (size)
         {
-        case AsteroidTag::Size::Large:  amount = Experience::XP_LARGE;  break;
+        case AsteroidTag::Size::Large: amount = Experience::XP_LARGE;  break;
         case AsteroidTag::Size::Medium: amount = Experience::XP_MEDIUM; break;
-        case AsteroidTag::Size::Small:  amount = Experience::XP_SMALL;  break;
+        case AsteroidTag::Size::Small: amount = Experience::XP_SMALL;  break;
         }
 
         xp.current += amount;
@@ -43,5 +43,5 @@ public:
 
 private:
     Frost::Registry& m_Registry;
-    Frost::Entity    m_PlayerEntity;
+    Frost::Entity m_PlayerEntity;
 };

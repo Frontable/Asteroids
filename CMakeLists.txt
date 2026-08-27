@@ -16,7 +16,7 @@ file(GLOB_RECURSE ASTEROIDS_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
 )
 
-add_executable(Asteroids ${ASTEROIDS_SOURCES} "src/Systems/PowerUpSystem.h")
+add_executable(Asteroids ${ASTEROIDS_SOURCES} "src/Systems/PowerUpSystem.h"   )
 
 target_include_directories(Asteroids
     PRIVATE

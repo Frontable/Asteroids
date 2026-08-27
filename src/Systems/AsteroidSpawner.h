@@ -81,9 +81,7 @@ public:
         m_Registry.Add<CircleCollider>(e, { radius });
         m_Registry.Add<AsteroidTag>(e, { size });
         m_Registry.Add<SpawnImmunity>(e, { 0.3f });
-        // 25% chance to drop power-up on any asteroid
-        if (rand() % 4 == 0)
-            SpawnPowerUp(position);
+        
     }
 
     void Reset()
@@ -108,45 +106,11 @@ private:
 
         SpawnAt(pos, AsteroidTag::Size::Large);
     }
-    void SpawnPowerUp(Frost::vec2 position)
-    {
-        auto& ecs = m_Registry;
-
-        // Random type
-        PowerUpType type = static_cast<PowerUpType>(rand() % 3);
-
-        Frost::Entity e = ecs.Create();
-
-        // Offset slightly from asteroid center
-        Frost::vec2 spawnPos = {
-            position.x + ((rand() % 40) - 20),
-            position.y + ((rand() % 40) - 20)
-        };
-
-        ecs.Add<Transform2D>(e, { spawnPos, 0.0f, { 20.0f, 20.0f } });
-        ecs.Add<CircleCollider>(e, { 15.0f });
-        ecs.Add<Lifetime>(e, { 10.0f }); // disappears after 10 seconds
-        ecs.Add<PowerUpTag>(e, {});
-        ecs.Add<PowerUp>(e, { type, 8.0f, 8.0f });
-
-        // Sprite per type
-        switch (type)
-        {
-        case PowerUpType::Shield:
-            ecs.Add<Sprite>(e, GetSprite(SpriteID::POWERUP_SHIELD));
-            break;
-        case PowerUpType::RapidFire:
-            ecs.Add<Sprite>(e, GetSprite(SpriteID::POWERUP_RAPIDFIRE));
-            break;
-        case PowerUpType::SpeedBoost:
-            ecs.Add<Sprite>(e, GetSprite(SpriteID::POWERUP_SPEED));
-            break;
-        }
-    }
+    
 
     Frost::Registry& m_Registry;
-    int   m_ScreenW;
-    int   m_ScreenH;
+    int m_ScreenW;
+    int m_ScreenH;
     float m_SpawnTimer = 0.0f;
     float m_SpawnInterval = 2.0f;
 };

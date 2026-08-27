@@ -114,7 +114,7 @@ public:
                     health.current
                     });
 
-                // Only die when health reaches zero
+                
                 if (health.current <= 0.0f)
                 {
                     health.isDead = true;
@@ -134,5 +134,5 @@ public:
 private:
     Frost::Registry& m_Registry;
     CollisionSystem& m_Collision;
-    int               m_Score = 0;
+    int m_Score = 0;
 };

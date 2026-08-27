@@ -38,10 +38,10 @@ public:
         m_XPSystem = std::make_unique<ExperienceSystem>(*m_Registry, m_PlayerEntity);
 
 
-        // text renderer for HUD labels
+       
         m_TextRenderer.Init("Assets/fonts/Cousine/Cousine-Regular.ttf", "Assets/Shaders/textV.glsl", "Assets/Shaders/textF.glsl", 24);
 
-        // fixed UI projection — not affected by camera
+        
         m_UIProjection = Frost::ortho(0.0f, 1280.0f, 720.0f, 0.0f);
 
         FROST_LOG("AsteroidsScene initializing");
@@ -63,7 +63,7 @@ public:
 
         // spawn player
         SpawnPlayer();
-        // After SpawnPlayer()
+        // after player
         m_PowerUpSystem = std::make_unique<PowerUpSystem>(*m_Registry, m_PlayerEntity);
         // wire events
         WireEvents();
@@ -79,33 +79,26 @@ public:
 
         auto& threadPool = Frost::Application::Get().GetThreadPool();
 
-        // ── Phase 1: Input scripts (main thread, serial) ──────────
-        // ScriptSystem runs PlayerScript + ShootingScript
-        // Already handled by Scene::Update() before OnUpdate
-
-        // ── Phase 2: Simulation (parallel) ───────────────────────
-        // These systems touch different components — safe to parallelize
+        //systems using different components, safe to do parallel
         auto f1 = threadPool.Submit([this, dt]() { m_Movement->Update(dt);      });
         auto f2 = threadPool.Submit([this, dt]() { m_SpawnImmunity->Update(dt); });
         auto f3 = threadPool.Submit([this, dt]() { m_Lifetime->Update(dt);      });
         auto f4 = threadPool.Submit([this, dt]() { m_Flicker->Update(dt);       });
 
-        // Wait for all phase 2 jobs
+        // jobs
         f1.get(); f2.get(); f3.get(); f4.get();
 
-        // ── Phase 3: Post-movement serial ────────────────────────
-        // Must wait for movement to finish before wrapping
+        //must wait on movement
         m_ScreenWrap->Update(dt);
 
-        // ── Phase 4: Spawning (main thread — entity creation not thread safe) ──
         m_Spawner->Update(dt);
 
-        // ── Phase 5: Collision + Reaction (serial) ────────────────
+        
         m_Collision->Update(dt);
         m_Damage->Update(dt);
         m_IFrames->Update(dt);
         m_PowerUpSystem->Update(dt);
-        m_XPSystem->Update(dt); // called from event now but tick here
+        m_XPSystem->Update(dt);
     }
 
     void OnRender() override
@@ -114,38 +107,67 @@ public:
         auto& renderer = app.GetRenderer();
         auto& camera = app.GetCamera();
 
-        // 1. Sprite pass — depth testing ON
+        
         glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         m_Shader->Bind();
         m_Shader->SetInt("uUseTexture", 1);
+        m_Shader->SetMat4("uProjection", camera.GetViewProjection());
+        m_Atlas->Bind(0);
+        m_Shader->SetInt("uTexture", 0);
+
         renderer.Begin(m_Shader, camera.GetViewProjection());
         m_RenderSystem->Update(0.0f);
         renderer.End();
 
-        // 2. Debug pass — disables/restores depth test internally
         if (m_DebugDraw)
         {
             auto view = m_Registry->GetView<Transform2D, CircleCollider>();
             for (auto entry : view)
             {
-                // ... circle drawing ...
+                Frost::Entity   e = entry.entity;
+                Transform2D& transform = std::get<0>(entry.components);
+                CircleCollider& collider = std::get<1>(entry.components);
+
+                Frost::vec4 color = { 0.0f, 1.0f, 0.0f, 1.0f };
+                if (m_Registry->Has<PlayerTag>(e))
+                    color = { 0.0f, 0.5f, 1.0f, 1.0f };
+                else if (m_Registry->Has<BulletTag>(e))
+                    color = { 1.0f, 1.0f, 0.0f, 1.0f };
+                else if (m_Registry->Has<AsteroidTag>(e))
+                    color = { 1.0f, 0.3f, 0.0f, 1.0f };
+                if (m_Registry->Has<SpawnImmunity>(e))
+                    color.a = 0.3f;
+
+                m_DebugRenderer.DrawCircle(transform.position, collider.radius, color);
             }
             m_DebugRenderer.Flush(camera.GetViewProjection());
         }
 
-        // 3. HUD pass — disables/restores depth test internally
-        m_HUD->Render(
-            renderer, app.GetWhiteTex(),
-            m_Shader, m_UIProjection,
-            m_PlayerEntity, m_Score
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        m_Shader->Bind();
+        m_Shader->SetInt("uUseTexture", 0);
+        m_Shader->SetMat4("uProjection", m_UIProjection);
+        app.GetWhiteTex()->Bind(0);
+        m_Shader->SetInt("uTexture", 0);
+
+        renderer.Begin(m_Shader, m_UIProjection);
+        DrawHUDBars(renderer, app.GetWhiteTex());
+        renderer.End();
+        
+        m_HUD->RenderText(
+            m_TextRenderer,
+            m_UIProjection,
+            m_PlayerEntity,
+            m_Score
         );
 
-        // 4. Text pass — no depth needed
-        glDisable(GL_DEPTH_TEST);
-        m_HUD->RenderText(
-            m_TextRenderer, m_UIProjection,
-            m_PlayerEntity, m_Score
-        );
         glEnable(GL_DEPTH_TEST);
     }
 
@@ -241,6 +263,11 @@ private:
                         { -perp.x, -perp.y });
                 }
                 // smol → nothing
+                
+                
+                // 25% chance to drop power-up on any asteroid
+                if (rand() % 4 == 0)
+                    SpawnPowerUp(e.position);
             }
         );
 
@@ -258,8 +285,9 @@ private:
             [this](const PlayerDiedEvent& e)
             {
                 FROST_LOG("Player died with score %d — reloading", e.finalScore);
-                Shutdown();
-                Frost::SceneManager::Get().Load<AsteroidsScene>();
+                //currently resets the ecs registry and creates a new player
+                ResetRegistry();
+                SpawnPlayer();
 
             }
         );
@@ -285,26 +313,149 @@ private:
         );
     }
 
+    void SpawnPowerUp(Frost::vec2 position)
+    {
+        auto& ecs = m_Registry;
+
+        // Random type
+        PowerUpType type = static_cast<PowerUpType>(rand() % 3);
+
+        Frost::Entity e = CreateEntity();
+        
+
+        // Offset slightly from asteroid center
+        Frost::vec2 spawnPos = {
+            position.x + ((rand() % 40) - 20),
+            position.y + ((rand() % 40) - 20)
+        };
+
+        AddComponent<Transform2D>(e, { spawnPos, 0.0f, { 20.0f, 20.0f } });
+        AddComponent<CircleCollider>(e, { 15.0f });
+        AddComponent<Lifetime>(e, { 10.0f }); // disappears after 10 seconds
+        AddComponent<PowerUpTag>(e, {});
+        AddComponent<PowerUp>(e, { type, 8.0f, 8.0f });
+
+        // dont have sprites for powerups yet so they just take garbage parts from atlas
+        switch (type)
+        {
+        case PowerUpType::Shield:
+            AddComponent<Sprite>(e, GetSprite(SpriteID::POWERUP_SHIELD));
+            break;
+        case PowerUpType::RapidFire:
+            AddComponent<Sprite>(e, GetSprite(SpriteID::POWERUP_RAPIDFIRE));
+            break;
+        case PowerUpType::SpeedBoost:
+            AddComponent<Sprite>(e, GetSprite(SpriteID::POWERUP_SPEED));
+            break;
+        }
+    }
+
+    void DrawHUDBars(Frost::BatchRenderer& renderer, Frost::Texture* whiteTex)
+    {
+        if (!m_Registry->IsAlive(m_PlayerEntity)) return;
+        if (!m_Registry->Has<Health>(m_PlayerEntity))     return;
+        if (!m_Registry->Has<Experience>(m_PlayerEntity)) return;
+
+        auto& health = m_Registry->Get<Health>(m_PlayerEntity);
+        auto& xp = m_Registry->Get<Experience>(m_PlayerEntity);
+
+        constexpr float BAR_W = 200.0f;
+        constexpr float BAR_H = 16.0f;
+        constexpr float XP_H = 10.0f;
+        constexpr float GAP = 6.0f;
+        constexpr float X = 20.0f;
+        constexpr float Y = 20.0f;
+
+        // ── Health bar background ──
+        DrawQuad(renderer, whiteTex,
+            { X, Y }, { BAR_W, BAR_H },
+            { 0.15f, 0.15f, 0.15f, 0.85f });
+
+        // ── Health bar fill ──
+        float hp = health.Percent();
+        Frost::vec4 hpColor;
+        if (hp > 0.6f) hpColor = { 0.2f,  0.85f, 0.2f,  0.9f };
+        else if (hp > 0.3f) hpColor = { 1.0f,  0.75f, 0.0f,  0.9f };
+        else                hpColor = { 0.9f,  0.15f, 0.15f, 0.9f };
+
+        DrawQuad(renderer, whiteTex,
+            { X, Y }, { BAR_W * hp, BAR_H },
+            hpColor);
+
+        // ── XP bar background ──
+        DrawQuad(renderer, whiteTex,
+            { X, Y + BAR_H + GAP }, { BAR_W, XP_H },
+            { 0.15f, 0.15f, 0.15f, 0.85f });
+
+        // ── XP bar fill ──
+        float xpPct = (float)xp.current / (float)xp.threshold;
+        DrawQuad(renderer, whiteTex,
+            { X, Y + BAR_H + GAP }, { BAR_W * xpPct, XP_H },
+            { 0.3f, 0.5f, 1.0f, 0.9f });
+
+        // ── Active power-up indicators ──
+        float indicatorX = X;
+        float indicatorY = Y + BAR_H + GAP + XP_H + GAP;
+
+        if (m_Registry->Has<ShieldEffect>(m_PlayerEntity))
+        {
+            DrawQuad(renderer, whiteTex,
+                { indicatorX, indicatorY }, { 20.0f, 20.0f },
+                { 0.2f, 0.6f, 1.0f, 0.9f }); // blue — shield
+            indicatorX += 26.0f;
+        }
+        if (m_Registry->Has<RapidFireEffect>(m_PlayerEntity))
+        {
+            DrawQuad(renderer, whiteTex,
+                { indicatorX, indicatorY }, { 20.0f, 20.0f },
+                { 1.0f, 0.8f, 0.0f, 0.9f }); // yellow — rapid fire
+            indicatorX += 26.0f;
+        }
+        if (m_Registry->Has<SpeedBoostEffect>(m_PlayerEntity))
+        {
+            DrawQuad(renderer, whiteTex,
+                { indicatorX, indicatorY }, { 20.0f, 20.0f },
+                { 0.2f, 1.0f, 0.4f, 0.9f }); // green — speed
+        }
+    }
+
+    void DrawQuad(Frost::BatchRenderer& renderer,
+        Frost::Texture* tex,
+        Frost::vec2           pos,
+        Frost::vec2           size,
+        Frost::vec4           color)
+    {
+        renderer.DrawSprite(
+            { pos.x + size.x * 0.5f, pos.y + size.y * 0.5f, 0.0f },
+            size,
+            0.0f,
+            { {0,0}, {1,1} },
+            tex,
+            1.0f, 1.0f,
+            color
+        );
+    }
+
     // systems
-    std::unique_ptr<MovementSystem>      m_Movement;
-    std::unique_ptr<ScreenWrapSystem>    m_ScreenWrap;
-    std::unique_ptr<LifetimeSystem>      m_Lifetime;
+    std::unique_ptr<MovementSystem> m_Movement;
+    std::unique_ptr<ScreenWrapSystem> m_ScreenWrap;
+    std::unique_ptr<LifetimeSystem> m_Lifetime;
     std::unique_ptr<SpawnImmunitySystem> m_SpawnImmunity;
-    std::unique_ptr<FlickerSystem>       m_Flicker;
-    std::unique_ptr<CollisionSystem>     m_Collision;
-    std::unique_ptr<DamageSystem>        m_Damage;
-    std::unique_ptr<AsteroidSpawner>     m_Spawner;
-    std::unique_ptr<IFrameSystem>        m_IFrames;
-    std::unique_ptr<HUDSystem>           m_HUD;
-    std::unique_ptr<ExperienceSystem>    m_XPSystem;
+    std::unique_ptr<FlickerSystem> m_Flicker;
+    std::unique_ptr<CollisionSystem> m_Collision;
+    std::unique_ptr<DamageSystem> m_Damage;
+    std::unique_ptr<AsteroidSpawner> m_Spawner;
+    std::unique_ptr<IFrameSystem> m_IFrames;
+    std::unique_ptr<HUDSystem> m_HUD;
+    std::unique_ptr<ExperienceSystem> m_XPSystem;
     std::unique_ptr<PowerUpSystem> m_PowerUpSystem;
-    Frost::TextRenderer                  m_TextRenderer;
-    Frost::mat4                          m_UIProjection;
+    Frost::TextRenderer m_TextRenderer;
+    Frost::mat4 m_UIProjection;
 
 
     std::unique_ptr<RenderSystem> m_RenderSystem;
     Frost::DebugRenderer m_DebugRenderer;
-    bool                 m_DebugDraw = false;
+    bool m_DebugDraw = false;
 
     // assets
     Frost::Texture* m_Atlas;
