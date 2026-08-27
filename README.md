@@ -15,6 +15,6 @@ A / D -> Rotate left and right only while thrust is on.
 Space -> Shoot
 F1 - toggle debug renderer. Will show hitboxes.
 
+<img width="400" height="225" alt="Asteroids 2026-08-28 01-50-29" src="https://github.com/user-attachments/assets/a844b5b1-a12c-476f-9daa-9d8e62c057d2" />
 
-<img width="266" height="150" alt="Asteroids" src="https://github.com/user-attachments/assets/2c121c33-fc4f-41ae-87a0-8d7a29bf8e26" />
 
