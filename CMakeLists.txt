@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ======================================================
-# FrostEngine — from submodule
+# Frost — from submodule
 # ======================================================
 add_subdirectory(third_party/Frost)
 
@@ -16,7 +16,7 @@ file(GLOB_RECURSE ASTEROIDS_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
 )
 
-add_executable(Asteroids ${ASTEROIDS_SOURCES} "src/Systems/PowerUpSystem.h"   )
+add_executable(Asteroids ${ASTEROIDS_SOURCES})
 
 target_include_directories(Asteroids
     PRIVATE
@@ -37,4 +37,11 @@ add_custom_command(TARGET Asteroids POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/Assets"
         "$<TARGET_FILE_DIR:Asteroids>/Assets"
+)
+
+add_custom_target(run
+    COMMAND $<TARGET_FILE:Asteroids>
+    DEPENDS Asteroids
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:Asteroids>
+    COMMENT "Starting Asteroids"
 )

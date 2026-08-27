@@ -10,6 +10,11 @@ struct AsteroidDestroyedEvent
     Frost::vec2      velocity;
 };
 
+struct ShootingEvent
+{
+
+};
+
 struct BulletImpactEvent
 {
     Frost::vec2 position;

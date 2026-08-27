@@ -62,7 +62,7 @@ inline Sprite GetSprite(SpriteID id)
     case SpriteID::PLAYER_THRUSTER:
         return { {69.0f,  14.0f}, {18.0f, 14.0f} };
     case SpriteID::PLAYER_BULLET:
-        return { {0.0f,   0.0f},  {8.0f,  8.0f} };
+        return { {69.0f,   76.0f},  {3.0f,  2.0f} };
 
     case SpriteID::ASTEROID_LARGE:
         return { {64.0f,  189.0f}, {60.0f, 60.0f} };

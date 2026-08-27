@@ -48,10 +48,12 @@ public:
         m_Registry->Add<Velocity2D>(bullet,
             { { forward.x * 600.0f, forward.y * 600.0f }, 0.0f });
         m_Registry->Add<Sprite>(bullet, GetSprite(SpriteID::PLAYER_BULLET));
-        m_Registry->Add<CircleCollider>(bullet, { 4.0f });
+        m_Registry->Add<CircleCollider>(bullet, { 8.0f });
         m_Registry->Add<Lifetime>(bullet, { 1.5f });
         m_Registry->Add<SpawnImmunity>(bullet, { 0.1f });
         m_Registry->Add<BulletTag>(bullet, {});
+
+        Frost::AudioSystem::Play("Assets/Sounds/shooting.wav");
     }
 
 private:

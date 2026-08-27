@@ -51,6 +51,8 @@ public:
         m_Atlas = Frost::AssetLoader::LoadTexture("atlas", "Assets/Images/asteroids.png");
         m_Shader = Frost::AssetLoader::LoadShader("gae", "Assets/Shaders/V.glsl", "Assets/Shaders/F.glsl");
 
+        Frost::AudioSystem::Preload("Assets/Sounds/shooting.wav");
+
         // render system
        m_RenderSystem = std::make_unique<RenderSystem>(
             *m_Registry,
