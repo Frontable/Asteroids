@@ -1,0 +1,9 @@
+# Visual Studio
+.vs/
+
+# CMake
+build/
+
+# Build output
+Debug/
+Release/
